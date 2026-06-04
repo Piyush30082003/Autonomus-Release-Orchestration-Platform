@@ -3,19 +3,25 @@ pipeline {
 
     stages {
 
-        stage('Install Dependencies') {
-            steps {
-                bat 'npm install'
-            }
-        }
-
-        stage('Build Docker Image') {
+        stage('Docker Build') {
             steps {
                 bat 'docker build -t paarth300/node-app:v1 .'
             }
         }
 
-        stage('Push Docker Image') {
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    bat 'docker login -u %DOCKER_USER% -p %DOCKER_PASS%'
+                }
+            }
+        }
+
+        stage('Docker Push') {
             steps {
                 bat 'docker push paarth300/node-app:v1'
             }
